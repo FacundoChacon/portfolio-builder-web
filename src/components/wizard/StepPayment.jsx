@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { QuoteSummary } from './QuoteSummary'
+import { ContactForm } from './ContactForm'
 
 export function StepPayment({ catalog, state, dispatch, quote, quoteError }) {
-  const [contactNotice, setContactNotice] = useState(false)
-
   return (
     <section aria-labelledby="step-payment" className="space-y-6">
       <div>
@@ -68,20 +66,7 @@ export function StepPayment({ catalog, state, dispatch, quote, quoteError }) {
 
       <QuoteSummary catalog={catalog} state={state} quote={quote} />
 
-      <div>
-        <button
-          type="button"
-          onClick={() => setContactNotice(true)}
-          className="rounded-lg bg-indigo-600 px-5 py-2.5 font-medium text-white hover:bg-indigo-700"
-        >
-          Contactame
-        </button>
-        {contactNotice && (
-          <p role="status" className="mt-2 text-sm text-gray-600">
-            Próximamente: el formulario de contacto se habilita en el próximo paso.
-          </p>
-        )}
-      </div>
+      <ContactForm wizardState={state} />
     </section>
   )
 }

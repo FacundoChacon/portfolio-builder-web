@@ -5,6 +5,7 @@ import { getCatalog, getQuote } from '../../api/client'
 import { Wizard } from './Wizard'
 
 vi.mock('../../api/client', () => ({
+  createLead: vi.fn(),
   getCatalog: vi.fn(),
   getQuote: vi.fn(),
   ApiError: class ApiError extends Error {},

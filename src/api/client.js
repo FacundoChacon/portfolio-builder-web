@@ -39,3 +39,11 @@ export function getQuote(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+export function createLead(payload) {
+  return request('/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}

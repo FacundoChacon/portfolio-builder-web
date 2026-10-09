@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, getCatalog, getQuote } from './client'
+import { ApiError, createLead, getCatalog, getQuote } from './client'
 
 describe('api client', () => {
   beforeEach(() => {
@@ -73,5 +73,94 @@ describe('api client', () => {
         discount_code: null,
       }),
     ).rejects.toBeInstanceOf(ApiError)
+  })
+
+  it('POSTs the lead to /leads and returns the 201 body', async () => {
+    const created = {
+      id: 123,
+      created_at: '2026-10-08T00:00:00Z',
+      name: 'Ana',
+      email: 'ana@example.com',
+      total: 150000,
+    }
+    fetch.mockResolvedValue({ ok: true, status: 201, json: async () => created })
+
+    const payload = {
+      name: 'Ana',
+      email: 'ana@example.com',
+      phone: null,
+      project_type_id: 'landing',
+      entity_id: 'pyme',
+      service_ids: ['seo'],
+      payment_method_id: 'transferencia',
+      discount_code: 'lanzamiento',
+    }
+    const result = await createLead(payload)
+
+    expect(result).toEqual(created)
+    const [url, options] = fetch.mock.calls[0]
+    expect(url).toBe('http://localhost:8000/leads')
+    expect(options.method).toBe('POST')
+    expect(options.headers['Content-Type']).toBe('application/json')
+    expect(JSON.parse(options.body)).toEqual(payload)
+  })
+
+  it('throws an ApiError with the 422 status on an invalid lead body', async () => {
+    fetch.mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ detail: 'invalid email' }),
+    })
+
+    await expect(
+      createLead({
+        name: 'Ana',
+        email: 'nope',
+        phone: null,
+        project_type_id: 'landing',
+        entity_id: 'pyme',
+        service_ids: [],
+        payment_method_id: 'transferencia',
+        discount_code: null,
+      }),
+    ).rejects.toMatchObject({ name: 'ApiError', status: 422 })
+  })
+
+  it('throws an ApiError with the 404 status on an unknown reference', async () => {
+    fetch.mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ detail: 'unknown entity' }),
+    })
+
+    await expect(
+      createLead({
+        name: 'Ana',
+        email: 'ana@example.com',
+        phone: null,
+        project_type_id: 'landing',
+        entity_id: 'ghost',
+        service_ids: [],
+        payment_method_id: 'transferencia',
+        discount_code: null,
+      }),
+    ).rejects.toMatchObject({ name: 'ApiError', status: 404 })
+  })
+
+  it('surfaces a controlled rejection when the network fails', async () => {
+    fetch.mockRejectedValue(new Error('network down'))
+
+    await expect(
+      createLead({
+        name: 'Ana',
+        email: 'ana@example.com',
+        phone: null,
+        project_type_id: 'landing',
+        entity_id: 'pyme',
+        service_ids: [],
+        payment_method_id: 'transferencia',
+        discount_code: null,
+      }),
+    ).rejects.toThrow('network down')
   })
 })
