@@ -11,16 +11,18 @@ describe('TestimonialsSection', () => {
     expect(testimonials.length).toBeGreaterThanOrEqual(3)
     expect(testimonials.length).toBeLessThanOrEqual(6)
     for (const testimonial of testimonials) {
+      expect(testimonial.rating).toBeGreaterThanOrEqual(1)
+      expect(testimonial.rating).toBeLessThanOrEqual(5)
       expect(screen.getByText(testimonial.nombre)).toBeInTheDocument()
       expect(screen.getByText(testimonial.rol)).toBeInTheDocument()
       expect(screen.getByText(testimonial.comentario)).toBeInTheDocument()
     }
   })
 
-  it('renders one rating per testimonial', () => {
+  it('renders one accessible rating per testimonial', () => {
     render(<TestimonialsSection />)
 
-    expect(screen.getAllByRole('img', { name: /valoración: \d de 5/i })).toHaveLength(testimonials.length)
+    expect(screen.getAllByRole('img', { name: /calificación: \d de 5/i })).toHaveLength(testimonials.length)
   })
 
   it('renders nothing when the testimonials list is empty', async () => {
@@ -30,6 +32,19 @@ describe('TestimonialsSection', () => {
 
     const { container } = render(<EmptyTestimonialsSection />)
     expect(container).toBeEmptyDOMElement()
+    vi.doUnmock('../../data/portfolio')
+  })
+
+  it('does not render stars when a rating is out of range', async () => {
+    vi.resetModules()
+    vi.doMock('../../data/portfolio', () => ({
+      testimonials: [{ nombre: 'Prueba Fuera de Rango', rol: 'Rol', comentario: 'Comentario', rating: 9 }],
+    }))
+    const { TestimonialsSection: BrokenRatingSection } = await import('./TestimonialsSection')
+
+    render(<BrokenRatingSection />)
+    expect(screen.getByText('Comentario')).toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
     vi.doUnmock('../../data/portfolio')
   })
 })
