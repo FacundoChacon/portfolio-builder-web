@@ -11,6 +11,7 @@ import { PaymentSection } from './PaymentSection'
 import { ProjectTypesSection } from './ProjectTypesSection'
 import { ServicesSection } from './ServicesSection'
 import { Showcase } from './Showcase'
+import { TestimonialsSection } from './TestimonialsSection'
 
 export function Landing() {
   const { catalog, loading, error } = useCatalog()
@@ -46,6 +47,7 @@ export function Landing() {
         </section>
 
         <Showcase />
+        <TestimonialsSection />
         <ContactSection />
       </main>
       <Footer />

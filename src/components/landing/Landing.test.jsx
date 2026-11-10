@@ -60,4 +60,13 @@ describe('Landing', () => {
     await screen.findByRole('heading', { name: /proyectos recientes/i })
     expect(screen.getByRole('heading', { name: /cómo funciona/i })).toBeInTheDocument()
   })
+
+  it('renders the testimonials section between showcase and contact', async () => {
+    render(<Landing />)
+    await screen.findByRole('heading', { name: /lo que dicen nuestros clientes/i })
+
+    const sectionIds = Array.from(document.querySelectorAll('main section'), (section) => section.id)
+    expect(sectionIds.indexOf('proyectos')).toBeLessThan(sectionIds.indexOf('testimonios'))
+    expect(sectionIds.indexOf('testimonios')).toBeLessThan(sectionIds.indexOf('contacto'))
+  })
 })
